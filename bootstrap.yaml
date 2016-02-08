@@ -1,0 +1,13 @@
+---
+- name: Add networks for controllers
+  hosts: overcloud
+  become: yes
+
+  tasks:
+    - name: Drop templates onto system
+      template:
+        src: "templates/ifcfg-sub-int.j2"
+        dest: "/etc/sysconfig/network-scripts/ifcfg-{{ local_interface }}:1"
+
+    - name: restart network
+      shell: "/usr/sbin/ifdown {{ local_interface }}:1 && /usr/sbin/ifup {{ local_interface}}:1"

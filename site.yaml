@@ -1,0 +1,48 @@
+---
+- name: Provision quagga stuff
+  hosts: overcloud
+  become: yes
+
+  tasks:
+
+
+    - name: Copy over Quagga RPMs
+      copy:
+        src: files/{{ item }}
+        dest: /tmp/{{ item }}
+      with_items:
+        - quagga-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+        - quagga-debuginfo-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+        - quagga-contrib-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+        - quagga-devel-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+
+    - name: Install Quagga RPMs
+      yum:
+        name: /tmp/{{ item }}
+        state: present
+      with_items:
+        - quagga-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+        - quagga-debuginfo-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+        - quagga-contrib-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+        - quagga-devel-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+
+    - name: Install Quagga template
+      template:
+        src: templates/Quagga.conf.j2
+        dest: /etc/quagga/Quagga.conf
+      notify:
+        - restart zebra service
+        - restart bgp service
+
+    - name: Set zebra service enabled
+      service: name=zebra state=enabled
+
+    - name: Set bgp service enabled
+      service: name=bgp state=enabled
+
+  handlers:
+    - name: restart zebra service
+      service: name=zebra state=restarted
+
+    - name: restart bgp service
+      service: name=bgp state=restarted

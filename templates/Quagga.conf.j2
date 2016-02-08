@@ -1,0 +1,49 @@
+username quagga nopassword
+!
+service integrated-vtysh-config
+!
+hostname {{ ansible_fqdn }}
+!
+interface br-ex
+ link-detect
+!
+interface br-int
+ link-detect
+!
+interface br-tun
+ link-detect
+!
+interface eth0
+ link-detect
+!
+interface eth1
+ link-detect
+!
+interface eth2
+ ipv6 nd ra-interval 5
+ link-detect
+ no ipv6 nd suppress-ra
+!
+interface eth3
+ ipv6 nd ra-interval 5
+ link-detect
+ no ipv6 nd suppress-ra
+!
+interface lo
+ link-detect
+!
+interface ovs-system
+ link-detect
+!
+router bgp {{ bgp_as }}
+ bgp router-id {{ bgp_loopback }}
+ redistribute connected
+ neighbor eth3 interface
+ neighbor eth3 remote-as external
+ neighbor eth3 capability extended-nexthop
+ neighbor eth2 interface
+ neighbor eth2 remote-as external
+ neighbor eth2 capability extended-nexthop
+!
+line vty
+!
