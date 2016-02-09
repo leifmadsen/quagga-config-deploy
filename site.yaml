@@ -8,15 +8,15 @@
       stat: path=/etc/sysconfig/network-scripts/ifcfg-eth0
       register: eth0
 
-    - name: stop eth0
-      shell: /usr/sbin/ifdown eth0
-      when: eth0.stat.exists
+    - name: Remove IP from eth0
+      shell: /usr/sbin/ip addr del {{ local_ipaddr }}/{{ local_prefix }} dev eth0
+      when: ansible_eth0.ipv4 is defined and base_interface == "eth0"
 
     - name: Drop usage of eth0 interface
       file:
         path: /etc/sysconfig/network-scripts/ifcfg-eth0
         state: absent
-      when: eth0.stat.exists
+      when: eth0.stat.exists and base_interface == "eth0"
 
     - name: Configure loopback
       template:
@@ -67,17 +67,29 @@
 
     - name: Install Quagga template
       template:
-        src: templates/Quagga.conf.j2
-        dest: /etc/quagga/Quagga.conf
+        src: templates/zebra.conf.j2
+        dest: /etc/quagga/zebra.conf
+        owner: quagga
+        group: quaggavt
+        mode: 0644
       notify:
         - restart zebra service
-        - restart bgp service
+
+    - name: Install BGPd template
+      template:
+        src: templates/bgpd.conf.j2
+        dest: /etc/quagga/bgpd.conf
+        owner: quagga
+        group: quaggavt
+        mode: 0644
+      notify:
+        - restart bgpd service
 
   handlers:
     - name: restart zebra service
       service: name=zebra state=restarted
 
-    - name: restart bgp service
+    - name: restart bgpd service
       service: name=bgpd state=restarted
 
     - name: restart loopback

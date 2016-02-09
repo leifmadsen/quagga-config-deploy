@@ -36,15 +36,5 @@ interface lo
 interface ovs-system
  link-detect
 !
-router bgp {{ bgp_asn }}
- bgp router-id {{ local_ipaddr }}
- redistribute connected
- neighbor eth3 interface
- neighbor eth3 remote-as external
- neighbor eth3 capability extended-nexthop
- neighbor eth2 interface
- neighbor eth2 remote-as external
- neighbor eth2 capability extended-nexthop
-!
 line vty
 !

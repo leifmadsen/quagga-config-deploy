@@ -1,9 +1,0 @@
-[overcloud:vars]
-ansible_ssh_user=heat-admin
-
-[overcloud]
-overcloud-compute-0.localdomain ansible_ssh_host=172.17.0.23 bgp_asn=65101 base_interface=eth0 local_ipaddr=172.16.0.23 local_prefix=32
-overcloud-compute-1.localdomain ansible_ssh_host=172.17.0.24 bgp_asn=65102 base_interface=eth0 local_ipaddr=172.16.0.24 local_prefix=32
-overcloud-controller-0.localdomain ansible_ssh_host=172.17.0.25 bgp_asn=65103 base_interface=br-ex local_ipaddr=172.16.0.25 local_prefix=32
-overcloud-controller-1.localdomain ansible_ssh_host=172.17.0.26 bgp_asn=65104 base_interface=br-ex local_ipaddr=172.16.0.26 local_prefix=32
-overcloud-controller-2.localdomain ansible_ssh_host=172.17.0.27 bgp_asn=65105 base_interface=br-ex local_ipaddr=172.16.0.27 local_prefix=32
