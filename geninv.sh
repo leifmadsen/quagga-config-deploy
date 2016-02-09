@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 bgp_asn=65100
 bootstrap_file=bootstrap
-inventory_file=new_inventory
+inventory_file=inventory
 
 truncate --size 0 $bootstrap_file
 truncate --size 0 $inventory_file
