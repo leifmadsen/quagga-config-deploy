@@ -1,6 +1,6 @@
 [overcloud]
-overcloud-compute-0.localdomain ansible_ssh_host=172.16.0.23 ansible_ssh_user=heat-admin local_prefix=24 local_interface=eth0 local_new_ipaddr=172.17.0.23
-overcloud-compute-1.localdomain ansible_ssh_host=172.16.0.24 ansible_ssh_user=heat-admin local_prefix=24 local_interface=eth0 local_new_ipaddr=172.17.0.24
-overcloud-controller-0.localdomain ansible_ssh_host=172.16.0.25 ansible_ssh_user=heat-admin local_prefix=24 local_interface=br-ex local_new_ipaddr=172.17.0.25
-overcloud-controller-1.localdomain ansible_ssh_host=172.16.0.26 ansible_ssh_user=heat-admin local_prefix=24 local_interface=br-ex local_new_ipaddr=172.17.0.26
-overcloud-controller-2.localdomain ansible_ssh_host=172.16.0.27 ansible_ssh_user=heat-admin local_prefix=24 local_interface=br-ex local_new_ipaddr=172.17.0.27
+overcloud-compute-0.localdomain ansible_ssh_host=172.16.0.23 ansible_ssh_user=heat-admin local_prefix=24 local_interface=eth0:1 local_ipaddr=172.17.0.23
+overcloud-compute-1.localdomain ansible_ssh_host=172.16.0.24 ansible_ssh_user=heat-admin local_prefix=24 local_interface=eth0:1 local_ipaddr=172.17.0.24
+overcloud-controller-0.localdomain ansible_ssh_host=172.16.0.25 ansible_ssh_user=heat-admin local_prefix=24 local_interface=br-ex:1 local_ipaddr=172.17.0.25
+overcloud-controller-1.localdomain ansible_ssh_host=172.16.0.26 ansible_ssh_user=heat-admin local_prefix=24 local_interface=br-ex:1 local_ipaddr=172.17.0.26
+overcloud-controller-2.localdomain ansible_ssh_host=172.16.0.27 ansible_ssh_user=heat-admin local_prefix=24 local_interface=br-ex:1 local_ipaddr=172.17.0.27

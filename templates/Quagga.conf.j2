@@ -1,3 +1,4 @@
+# {{ ansible_managed }} --
 username quagga nopassword
 !
 service integrated-vtysh-config
@@ -35,8 +36,8 @@ interface lo
 interface ovs-system
  link-detect
 !
-router bgp {{ bgp_as }}
- bgp router-id {{ bgp_loopback }}
+router bgp {{ bgp_asn }}
+ bgp router-id {{ local_ipaddr }}
  redistribute connected
  neighbor eth3 interface
  neighbor eth3 remote-as external

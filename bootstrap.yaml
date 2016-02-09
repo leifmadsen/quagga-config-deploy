@@ -6,7 +6,7 @@
   tasks:
     - name: Drop templates onto system
       template:
-        src: "templates/ifcfg-sub-int.j2"
+        src: "templates/ifcfg-int.j2"
         dest: "/etc/sysconfig/network-scripts/ifcfg-{{ local_interface }}:1"
 
     - name: restart network

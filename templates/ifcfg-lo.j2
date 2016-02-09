@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+DEVICE=lo
+IPADDR={{ local_ipaddr }}
+NETMASK=255.255.255.255
+NETWORK={{ local_ipaddr }}
+# If you're having problems with gated making 127.0.0.0/8 a martian,
+# you can change this to something else (255.255.255.255, for example)
+ONBOOT=yes
+NAME=loopback
