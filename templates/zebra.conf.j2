@@ -1,5 +1,4 @@
-# {{ ansible_managed }} --
-username quagga nopassword
+! {{ ansible_managed }}
 !
 service integrated-vtysh-config
 !
@@ -35,6 +34,8 @@ interface lo
 !
 interface ovs-system
  link-detect
+!
+ip forwarding
 !
 line vty
 !

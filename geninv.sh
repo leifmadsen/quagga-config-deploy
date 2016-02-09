@@ -19,12 +19,13 @@ ansible_ssh_user=heat-admin
 EOL
 
 for host in $(nova list --fields Networks | awk '/ctlplane/ {print $4};' | cut -d'=' -f2); do
-	result=`ssh heat-admin@$host "/usr/sbin/ip a s | awk '/inet / {print $2};' | grep '172.16.0' | grep -v '\/32' && hostname -f"`
+	result=`ssh -o StrictHostKeyChecking=no heat-admin@$host "/usr/sbin/ip a s | awk '/inet / {print $2};' | grep '172.16.0' | grep -v '\/32' && hostname -f"`
 	hostname=`echo $result | awk '/inet / {print $9};'`
 	address=`echo $result | awk '/inet / {print $2};'`
 	ip=`echo $address | cut -f1 -d'/'`
 	prefix=`echo $address | cut -f2 -d'/'`
 	interface=`echo $result | awk '/inet / {print $8};'`
+	ansible_interface=`echo $interface | tr - _`
 
 	second_octet=`echo $ip | cut -f2 -d'.'`
 	new_ip=`echo -n $ip | cut -f1 -d'.'`
@@ -43,6 +44,6 @@ EOL
 	bgp_asn=$[$bgp_asn+1]
 
 	cat >> $inventory_file <<EOL
-$hostname ansible_ssh_host=$new_ip bgp_asn=$bgp_asn base_interface=$interface local_ipaddr=$ip local_prefix=32
+$hostname ansible_ssh_host=$new_ip bgp_asn=$bgp_asn base_interface=$interface local_ipaddr=$ip local_prefix=32 del_prefix=$prefix ansible_interface=$ansible_interface
 EOL
 done
