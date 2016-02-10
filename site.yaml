@@ -74,6 +74,8 @@
         mode: 0644
       notify:
         - restart zebra service
+        - restart bgpd service
+        - pcs resource cleanup
 
     - name: Install BGPd template
       template:
@@ -83,7 +85,9 @@
         group: quaggavt
         mode: 0644
       notify:
+        - restart zebra service
         - restart bgpd service
+        - pcs resource cleanup
 
     - name: Install vtysh template
       template:
@@ -94,6 +98,8 @@
         mode: 0644
       notify:
         - restart zebra service
+        - restart bgpd service
+        - pcs resource cleanup
 
   handlers:
     - name: restart zebra service
@@ -111,4 +117,13 @@
     - name: restart eth3
       shell: /usr/sbin/ifdown eth3 && /usr/sbin/ifup eth3
 
+    - name: pcs resource cleanup
+      shell: sleep 60 && /sbin/pcs resource cleanup
 
+- name: Update controller-0 for pacemaker
+  hosts: overcloud-controller-0.localdomain
+  become: yes
+
+  tasks:
+    - name: Update the PCS configuration
+      shell: for i in $(pcs resource show | awk  '/IPaddr2/ {print $1}'); do pcs resource update $i nic=lo; done
