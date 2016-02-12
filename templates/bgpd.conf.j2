@@ -4,11 +4,11 @@ router bgp {{ bgp_asn }}
  bgp bestpath as-path multipath-relax
  bgp bestpath compare-routerid
  redistribute connected
- {% for bgp_int in bgp_interfaces %}
+{% for bgp_int in bgp_interfaces %}
  neighbor {{ bgp_int }} interface
  neighbor {{ bgp_int }} remote-as external
  neighbor {{ bgp_int }} capability extended-nexthop
  neighbor {{ bgp_int }} advertisement-interval 0
- {% endfor %}
+{% endfor %}
  maximum-paths 16
 !

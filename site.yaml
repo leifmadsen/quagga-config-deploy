@@ -8,10 +8,10 @@
       - p1p1
       - p1p2
     quagga_rpms:
-      - quagga-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-      - quagga-debuginfo-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-      - quagga-contrib-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-      - quagga-devel-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+      - /tmp/quagga-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+      - /tmp/quagga-debuginfo-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+      - /tmp/quagga-contrib-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+      - /tmp/quagga-devel-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
 
   tasks:
   - name: Remove IP from base_interface
@@ -20,12 +20,15 @@
 
   - name: Check if dhcp enabled on base_interface
     shell: grep -c "dhcp" /etc/sysconfig/network-scripts/ifcfg-{{ base_interface }}
+    ignore_errors: True
+    always_run: True
+    changed_when: True
     register: dhcp_check
     when: ansible_{{ ansible_interface }}.ipv4 is defined
 
-  - name: Switch out dhcp for none on bootproto on base_inteface
+  - name: Switch out dhcp for none on bootproto on base_interface
     shell: "sed -i s/BOOTPROTO=.*/BOOTPROTO=none/g /etc/sysconfig/network-scripts/ifcfg-{{ base_interface }}"
-    when: dhcp_check != "0"
+    when: dhcp_check.changed == True
 
   - name: Configure loopback
     template:
@@ -36,8 +39,10 @@
 
   - name: Configure BGP interfaces
     template:
-      src: templates/ifcfg-{{ item }}.j2
+      src: templates/ifcfg-int.j2
       dest: /etc/sysconfig/network-scripts/ifcfg-{{ item }}
+    register: bgp_items
+    always_run: True
     with_items: "{{ bgp_interfaces }}"
     notify:
       - restart bgp network
@@ -45,7 +50,7 @@
   - name: Copy over Quagga RPMs
     copy:
       src: files/{{ item }}
-      dest: /tmp/{{ item }}
+      dest: "{{ item }}"
     with_items: "{{ quagga_rpms }}"
 
   - name: Install Quagga RPMs
@@ -106,7 +111,7 @@
     - name: restart loopback
       shell: /usr/sbin/ifdown lo && /usr/sbin/ifup lo
 
-    - name: restart bgp interfaces
+    - name: restart bgp network
       shell: /usr/sbin/ifdown {{ item }} && /usr/sbin/ifup {{ item }}
       with_items: "{{ bgp_interfaces }}"
 

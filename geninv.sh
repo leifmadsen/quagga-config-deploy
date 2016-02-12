@@ -5,12 +5,8 @@ inventory_file=inventory
 default_network="10.17.66"
 network=${1:-$default_network}
 
-echo $network
-exit
-
 truncate --size 0 $bootstrap_file
 truncate --size 0 $inventory_file
-
 
 cat >> $bootstrap_file <<EOL
 [overcloud]

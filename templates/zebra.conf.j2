@@ -17,7 +17,7 @@ interface eth0
 interface eth1
  link-detect
 !
-{% for bgp_int in bpg_interfaces %}
+{% for bgp_int in bgp_interfaces %}
 interface {{ bgp_int }}
  ipv6 nd ra-interval 5
  link-detect
