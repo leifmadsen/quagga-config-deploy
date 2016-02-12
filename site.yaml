@@ -25,19 +25,19 @@
       notify:
         - restart loopback
 
-    - name: Configure eth2
+    - name: Configure p1p1
       template:
-        src: templates/ifcfg-eth2.j2
-        dest: /etc/sysconfig/network-scripts/ifcfg-eth2
+        src: templates/ifcfg-p1p1.j2
+        dest: /etc/sysconfig/network-scripts/ifcfg-p1p1
       notify:
-        - restart eth2
+        - restart p1p1
 
-    - name: Configure eth3
+    - name: Configure p1p2
       template:
-        src: templates/ifcfg-eth3.j2
-        dest: /etc/sysconfig/network-scripts/ifcfg-eth3
+        src: templates/ifcfg-p1p2.j2
+        dest: /etc/sysconfig/network-scripts/ifcfg-p1p2
       notify:
-        - restart eth3
+        - restart p1p2
 
     - name: Copy over Quagga RPMs
       copy:
@@ -111,14 +111,15 @@
     - name: restart loopback
       shell: /usr/sbin/ifdown lo && /usr/sbin/ifup lo
 
-    - name: restart eth2
-      shell: /usr/sbin/ifdown eth2 && /usr/sbin/ifup eth2
+    - name: restart p1p1
+      shell: /usr/sbin/ifdown p1p1 && /usr/sbin/ifup p1p1
 
-    - name: restart eth3
-      shell: /usr/sbin/ifdown eth3 && /usr/sbin/ifup eth3
+    - name: restart p1p2
+      shell: /usr/sbin/ifdown p1p2 && /usr/sbin/ifup p1p2
 
     - name: pcs resource cleanup
       shell: sleep 60 && /sbin/pcs resource cleanup
+      when: ansible_nodename == "overcloud-controller-0.localdomain"
 
 - name: Update controller-0 for pacemaker
   hosts: overcloud-controller-0.localdomain

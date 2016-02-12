@@ -1,13 +1,16 @@
 ! {{ ansible_managed }}
 router bgp {{ bgp_asn }}
  bgp router-id {{ local_ipaddr }}
+ bgp bestpath as-path multipath-relax
+ bgp bestpath compare-routerid
  redistribute connected
- neighbor eth3 interface
- neighbor eth3 remote-as external
- neighbor eth3 capability extended-nexthop
- neighbor eth3 next-hop-self
- neighbor eth2 interface
- neighbor eth2 remote-as external
- neighbor eth2 capability extended-nexthop
- neighbor eth2 next-hop-self
+ neighbor p1p2 interface
+ neighbor p1p2 remote-as external
+ neighbor p1p2 capability extended-nexthop
+ neighbor p1p2 advertisement-interval 0
+ neighbor p1p1 interface
+ neighbor p1p1 remote-as external
+ neighbor p1p1 capability extended-nexthop
+ neighbor p1p1 advertisement-interval 0
+ maximum-paths 16
 !
