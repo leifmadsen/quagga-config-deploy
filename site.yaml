@@ -3,103 +3,98 @@
 - name: Provision quagga stuff
   hosts: overcloud
   become: yes
+  vars:
+    bgp_interfaces:
+      - p1p1
+      - p1p2
+    quagga_rpms:
+      - quagga-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+      - quagga-debuginfo-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+      - quagga-contrib-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+      - quagga-devel-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
 
   tasks:
-    - name: Remove IP from base_interface
-      shell: /usr/sbin/ip addr del {{ local_ipaddr }}/{{ del_prefix }} dev {{ base_interface }}
-      when: ansible_{{ ansible_interface }}.ipv4 is defined
+  - name: Remove IP from base_interface
+    shell: /usr/sbin/ip addr del {{ local_ipaddr }}/{{ del_prefix }} dev {{ base_interface }}
+    when: ansible_{{ ansible_interface }}.ipv4 is defined
 
-    - name: Check if dhcp enabled on base_interface
-      shell: grep -c "dhcp" /etc/sysconfig/network-scripts/ifcfg-{{ base_interface }}
-      register: dhcp_check
-      when: ansible_{{ ansible_interface }}.ipv4 is defined
+  - name: Check if dhcp enabled on base_interface
+    shell: grep -c "dhcp" /etc/sysconfig/network-scripts/ifcfg-{{ base_interface }}
+    register: dhcp_check
+    when: ansible_{{ ansible_interface }}.ipv4 is defined
 
-    - name: Switch out dhcp for none on bootproto on base_inteface
-      shell: "sed -i s/BOOTPROTO=.*/BOOTPROTO=none/g /etc/sysconfig/network-scripts/ifcfg-{{ base_interface }}"
-      when: dhcp_check != "0"
+  - name: Switch out dhcp for none on bootproto on base_inteface
+    shell: "sed -i s/BOOTPROTO=.*/BOOTPROTO=none/g /etc/sysconfig/network-scripts/ifcfg-{{ base_interface }}"
+    when: dhcp_check != "0"
 
-    - name: Configure loopback
-      template:
-        src: templates/ifcfg-lo.j2
-        dest: /etc/sysconfig/network-scripts/ifcfg-lo
-      notify:
-        - restart loopback
+  - name: Configure loopback
+    template:
+      src: templates/ifcfg-lo.j2
+      dest: /etc/sysconfig/network-scripts/ifcfg-lo
+    notify:
+      - restart loopback
 
-    - name: Configure p1p1
-      template:
-        src: templates/ifcfg-p1p1.j2
-        dest: /etc/sysconfig/network-scripts/ifcfg-p1p1
-      notify:
-        - restart p1p1
+  - name: Configure BGP interfaces
+    template:
+      src: templates/ifcfg-{{ item }}.j2
+      dest: /etc/sysconfig/network-scripts/ifcfg-{{ item }}
+    with_items: "{{ bgp_interfaces }}"
+    notify:
+      - restart bgp network
 
-    - name: Configure p1p2
-      template:
-        src: templates/ifcfg-p1p2.j2
-        dest: /etc/sysconfig/network-scripts/ifcfg-p1p2
-      notify:
-        - restart p1p2
+  - name: Copy over Quagga RPMs
+    copy:
+      src: files/{{ item }}
+      dest: /tmp/{{ item }}
+    with_items: "{{ quagga_rpms }}"
 
-    - name: Copy over Quagga RPMs
-      copy:
-        src: files/{{ item }}
-        dest: /tmp/{{ item }}
-      with_items:
-        - quagga-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-        - quagga-debuginfo-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-        - quagga-contrib-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-        - quagga-devel-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+  - name: Install Quagga RPMs
+    yum: 
+      name: "{{ item }}"
+      state: present
+    with_items: "{{ quagga_rpms }}"
 
-    - name: Install Quagga RPMs
-      yum: 
-        name: "{{ item }}"
-        state: present
-      with_items:
-        - /tmp/quagga-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-        - /tmp/quagga-debuginfo-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-        - /tmp/quagga-contrib-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
-        - /tmp/quagga-devel-0.99.23.1-cl2.5+2.el7.centos.x86_64.rpm
+  - name: Set zebra service enabled
+    service: name=zebra enabled=yes
 
-    - name: Set zebra service enabled
-      service: name=zebra enabled=yes
+  - name: Set bgp service enabled
+    service: name=bgpd enabled=yes
 
-    - name: Set bgp service enabled
-      service: name=bgpd enabled=yes
+  - name: Install Zebra template
+    template:
+      src: templates/zebra.conf.j2
+      dest: /etc/quagga/zebra.conf
+      owner: quagga
+      group: quaggavt
+      mode: 0644
+    notify:
+      - restart zebra service
+      - restart bgpd service
+      - pcs resource cleanup
 
-    - name: Install Zebra template
-      template:
-        src: templates/zebra.conf.j2
-        dest: /etc/quagga/zebra.conf
-        owner: quagga
-        group: quaggavt
-        mode: 0644
-      notify:
-        - restart zebra service
-        - restart bgpd service
-        - pcs resource cleanup
+  - name: Install BGPd template
+    template:
+      src: templates/bgpd.conf.j2
+      dest: /etc/quagga/bgpd.conf
+      owner: quagga
+      group: quaggavt
+      mode: 0644
+    notify:
+      - restart zebra service
+      - restart bgpd service
+      - pcs resource cleanup
 
-    - name: Install BGPd template
-      template:
-        src: templates/bgpd.conf.j2
-        dest: /etc/quagga/bgpd.conf
-        owner: quagga
-        group: quaggavt
-        mode: 0644
-      notify:
-        - restart zebra service
-        - restart bgpd service
-        - pcs resource cleanup
-
-    - name: Install vtysh template
-      template:
-        src: templates/vtysh.conf.j2
-        dest: /etc/quagga/vtysh.conf
-        owner: quagga
-        group: quaggavt
-        mode: 0644
-      notify:
-        - restart zebra service
-        - restart bgpd service
-        - pcs resource cleanup
+  - name: Install vtysh template
+    template:
+      src: templates/vtysh.conf.j2
+      dest: /etc/quagga/vtysh.conf
+      owner: quagga
+      group: quaggavt
+      mode: 0644
+    notify:
+      - restart zebra service
+      - restart bgpd service
+      - pcs resource cleanup
 
   handlers:
     - name: restart zebra service
@@ -111,11 +106,9 @@
     - name: restart loopback
       shell: /usr/sbin/ifdown lo && /usr/sbin/ifup lo
 
-    - name: restart p1p1
-      shell: /usr/sbin/ifdown p1p1 && /usr/sbin/ifup p1p1
-
-    - name: restart p1p2
-      shell: /usr/sbin/ifdown p1p2 && /usr/sbin/ifup p1p2
+    - name: restart bgp interfaces
+      shell: /usr/sbin/ifdown {{ item }} && /usr/sbin/ifup {{ item }}
+      with_items: "{{ bgp_interfaces }}"
 
     - name: pcs resource cleanup
       shell: sleep 60 && /sbin/pcs resource cleanup
