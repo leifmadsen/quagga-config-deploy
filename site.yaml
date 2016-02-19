@@ -3,6 +3,7 @@
 - name: Provision quagga stuff
   hosts: overcloud
   become: yes
+  serial: 10
   vars:
     bgp_interfaces:
       - p1p1

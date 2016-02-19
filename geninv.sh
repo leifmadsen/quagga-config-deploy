@@ -2,7 +2,7 @@
 bgp_asn=65100
 bootstrap_file=bootstrap
 inventory_file=inventory
-default_network="10.17.66"
+default_network="10.17"
 network=${1:-$default_network}
 
 truncate --size 0 $bootstrap_file
