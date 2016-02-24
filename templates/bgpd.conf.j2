@@ -1,7 +1,7 @@
 ! {{ ansible_managed }}
 router bgp {{ bgp_asn }}
  bgp router-id {{ local_ipaddr }}
- bgp bestpath as-path multipath-relax
+ bgp bestpath as-path multipath-relax no-as-set
  bgp bestpath compare-routerid
  redistribute connected
 {% for bgp_int in bgp_interfaces %}
