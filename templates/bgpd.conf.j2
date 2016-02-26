@@ -2,10 +2,9 @@
 router bgp {{ bgp_asn }}
  bgp router-id {{ local_ipaddr }}
  bgp bestpath as-path multipath-relax no-as-set
- bgp bestpath compare-routerid
- redistribute connected
+ bgp default show-hostname
 {% for bgp_int in bgp_interfaces %}
- neighbor {{ bgp_int }} interface
+ neighbor {{ bgp_int }} interface v6only
  neighbor {{ bgp_int }} remote-as external
  neighbor {{ bgp_int }} capability extended-nexthop
  neighbor {{ bgp_int }} advertisement-interval 0
