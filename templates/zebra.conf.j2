@@ -2,6 +2,8 @@
 !
 hostname {{ ansible_fqdn }}
 !
+log file /var/log/quagga/zebra.log
+!
 interface br-ex
  link-detect
 !
